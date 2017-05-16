@@ -57,5 +57,11 @@ describe('HttpClient', () =>
 
       assert.equal(request.headers['User-Agent'], 'Not Node/1.1');
     });
+
+    // it "uses body in request" do
+    // it "parses 200 level response"
+    // it "throws for non-200 level response"
+    // it "makes request when only a path is specified" do
+    // it "allows subclasses to modify response body" do
   })
 );
