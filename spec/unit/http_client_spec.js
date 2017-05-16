@@ -57,27 +57,5 @@ describe('HttpClient', () =>
 
       assert.equal(request.headers['User-Agent'], 'Not Node/1.1');
     });
-
-    it('test get => ', function () {
-      let http = new braintreehttp.HttpClient(new braintreehttp.Environment('http://ip.jsontest.com'));
-
-      let request = {
-        path: '/',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        }
-      };
-
-      http.execute(request).then(function (result) {
-        if (result.success) {
-          console.log('Result: ' + result);
-        } else {
-          console.error(result);
-        }
-      }).catch(function (err) {
-        console.error(err);
-      });
-    });
   })
 );
