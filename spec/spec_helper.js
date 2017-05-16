@@ -1,12 +1,6 @@
 'use strict';
 /* eslint-disable func-style, no-console */
 
-// let http = require('http');
-// let https = require('https');
-// let uri = require('url');
-// let chai = require('chai');
-// let Buffer = require('buffer').Buffer;
-// let xml2js = require('xml2js');
 let chai = require('chai');
 
 chai.Assertion.includeStack = true;

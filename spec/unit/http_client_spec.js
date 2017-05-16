@@ -1,21 +1,43 @@
 'use strict';
+/* eslint-disable no-unused-vars, no-invalid-this */
 
 let braintreehttp = require('../../lib/braintreehttp');
+let nock = require('nock');
 
-describe('HttpClient', () =>
-  describe('executes', function () {
-    it('initialized with environment and base url => ', function () {
-      let http = new braintreehttp.HttpClient(new braintreehttp.Environment('https://localhost:3000/api'));
+class BTJsonHttpClient extends braintreehttp.HttpClient {
+  parseResponseBody(data, headers) {
+    return JSON.parse(data);
+  }
+}
 
-      assert.equal(http.environment.baseUrl, 'https://localhost:3000/api');
+describe('HttpClient', function () {
+  let environment = new braintreehttp.Environment('https://localhost');
+  let context = null;
+  let http = null;
+
+  beforeEach(function () {
+    context = nock(environment.baseUrl);
+    http = new braintreehttp.HttpClient(environment);
+  });
+
+  describe('execute', function (done) {
+    it('initialized with environment and base url', function () {
+      assert.equal(http.environment.baseUrl, 'https://localhost');
     });
 
-    it('uses injectors to modify a request => ', function () {
-      let http = new braintreehttp.HttpClient(new braintreehttp.Environment('https://localhost:3000/api'));
+    it('uses injectors to modify a request', function () {
+      let headers = {
+        'some-key': 'Some Value'
+      };
+
+      context.get('/')
+        .reply(200, function (uri, body) {
+          assert.equal(this.req.headers['some-key'], headers['some-key']);
+        });
 
       class CustomInjector extends braintreehttp.Injector {
         inject(request) {
-          request.headers = {'Some-Key': 'Some Value'};
+          request.headers = headers;
         }
       }
 
@@ -26,42 +48,120 @@ describe('HttpClient', () =>
         path: '/'
       };
 
-      http.execute(request);
-
-      assert.equal(request.headers['Some-Key'], 'Some Value');
+      return http.execute(request);
     });
 
-    it('sets user agent if not set => ', function () {
-      let http = new braintreehttp.HttpClient(new braintreehttp.Environment('https://localhost:3000/api'));
-
+    it('sets user agent if not set', function () {
       let request = {
         method: 'GET',
         path: '/'
       };
 
-      http.execute(request);
+      context.get('/')
+        .reply(200, function (uri, body) {
+          assert.equal(this.req.headers['user-agent'], 'BraintreeHttp-Node HTTP/1.1');
+        });
 
-      assert.equal(request.headers['User-Agent'], 'BraintreeHttp-Node HTTP/1.1');
+      return http.execute(request);
     });
 
-    it('does not override user agent if set => ', function () {
-      let http = new braintreehttp.HttpClient(new braintreehttp.Environment('https://localhost:3000/api'));
-
+    it('does not override user agent if set', function () {
       let request = {
         method: 'GET',
         path: '/',
         headers: {'User-Agent': 'Not Node/1.1'}
       };
 
-      http.execute(request);
+      context.get('/')
+        .reply(200, function (uri, body) {
+          assert.equal(this.req.headers['user-agent'], 'Not Node/1.1');
+        });
 
-      assert.equal(request.headers['User-Agent'], 'Not Node/1.1');
+      return http.execute(request);
     });
 
-    // it "uses body in request" do
-    // it "parses 200 level response"
-    // it "throws for non-200 level response"
-    // it "makes request when only a path is specified" do
-    // it "allows subclasses to modify response body" do
-  })
-);
+    it('uses body in request', function () {
+      let request = {
+        method: 'POST',
+        path: '/',
+        body: {
+          someKey: 'val',
+          someVal: 'val2'
+        }
+      };
+
+      context.post('/')
+      .reply(200, function (uri, body) {
+        body = JSON.parse(body);
+        assert.equal(body.someKey, 'val');
+        assert.equal(body.someVal, 'val2');
+      });
+
+      return http.execute(request);
+    });
+
+    it('parses 200-level response', function () {
+      http = new BTJsonHttpClient(environment);
+      let request = {
+        method: 'GET',
+        path: '/'
+      };
+
+      context.get('/')
+      .reply(200, function (uri, body) {
+        return JSON.stringify({
+          data: 1,
+          key: 'val'
+        });
+      });
+
+      return http.execute(request)
+        .then((resp) => {
+          assert.equal(resp.statusCode, 200);
+          assert.equal(resp.result.data, 1);
+          assert.equal(resp.result.key, 'val');
+        });
+    });
+
+    it('rejects promise with error on non 200-level response', function () {
+      let request = {
+        method: 'GET',
+        path: '/'
+      };
+
+      context.get('/')
+        .reply(400, 'some data about this error', {
+          'request-id': '1234'
+        });
+
+      return http.execute(request)
+        .then((resp) => {
+          assert.fail('then shouldn\'t be called for 400 status code');
+        })
+        .catch((error) => {
+          assert.equal(error.statusCode, 400);
+          assert.equal(error.result, 'some data about this error');
+          assert.equal(error.headers['request-id'], '1234');
+        });
+    });
+
+    it('makes a request when only a path is specified', function () {
+      let request = {
+        method: 'GET',
+        path: '/some/path'
+      };
+
+      context.get(request.path)
+        .reply(200);
+
+      return http.execute(request);
+    });
+
+    it('makes a request when full url is specified', function () {
+      let request = {
+        method: 'GET',
+        path: 'http://some.otherhost.org/some/path'
+      };
+    });
+  });
+});
