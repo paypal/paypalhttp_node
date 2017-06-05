@@ -17,7 +17,7 @@
     "url": "https://github.braintreeps.com/dx/BraintreeHttp-Node.git"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=4"
   },
   "dependencies": {
   },
