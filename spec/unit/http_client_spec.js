@@ -20,7 +20,13 @@ describe('HttpClient', function () {
     http = new braintreehttp.HttpClient(environment);
   });
 
-  describe('execute', function (done) {
+  describe('getUserAgent', function () {
+    it('returns the user agent', function () {
+      assert.equal(http.getUserAgent(), 'BraintreeHttp-Node HTTP/1.1');
+    });
+  });
+
+  describe('execute', function () {
     it('initialized with environment and base url', function () {
       assert.equal(http.environment.baseUrl, 'https://localhost');
     });
