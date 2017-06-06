@@ -3,6 +3,7 @@
 
 let braintreehttp = require('../../lib/braintreehttp');
 let nock = require('nock');
+let sinon = require('sinon');
 
 class BTJsonHttpClient extends braintreehttp.HttpClient {
   serializeRequest() {
@@ -21,8 +22,8 @@ describe('HttpClient', function () {
 
   beforeEach(function () {
     class CustomHttpClient extends braintreehttp.HttpClient {
-      serializeRequest() {
-        return 'request';
+      serializeRequest(request) {
+        return JSON.stringify(request.body);
       }
       deserializeResponse() {
         return 'response';
@@ -170,6 +171,21 @@ describe('HttpClient', function () {
       return this.http.execute(request);
     });
 
+    it('sets user agent if user agent set to Node', function () {
+      let request = {
+        method: 'GET',
+        path: '/',
+        headers: {'User-Agent': 'Node'}
+      };
+
+      this.context.get('/')
+        .reply(200, function (uri, body) {
+          assert.equal(this.req.headers['user-agent'], 'BraintreeHttp-Node HTTP/1.1');
+        });
+
+      return this.http.execute(request);
+    });
+
     it('does not override user agent if set', function () {
       let request = {
         method: 'GET',
@@ -195,14 +211,53 @@ describe('HttpClient', function () {
         }
       };
 
-      this.context.post('/')
-      .reply(200, function (uri, body) {
+      this.context.post('/').reply(200, function (uri, body) {
         body = JSON.parse(body);
         assert.equal(body.someKey, 'val');
         assert.equal(body.someVal, 'val2');
       });
 
       return this.http.execute(request);
+    });
+
+    it('uses provided body if it is a string', function () {
+      let request = {
+        method: 'POST',
+        path: '/',
+        body: '{"someKey":"val","someVal":"val2"}'
+      };
+
+      sinon.spy(this.http, 'serializeRequest');
+
+      this.context.post('/').reply(200, function (uri, body) {
+        body = JSON.parse(body);
+        assert.equal(body.someKey, 'val');
+        assert.equal(body.someVal, 'val2');
+      });
+
+      return this.http.execute(request).then(() => {
+        assert.equal(this.http.serializeRequest.called, false);
+      });
+    });
+
+    it('users serialize function if body is not a string', function () {
+      let request = {
+        method: 'POST',
+        path: '/',
+        body: {
+          someKey: 'val',
+          someVal: 'val2'
+        }
+      };
+
+      sinon.spy(this.http, 'serializeRequest');
+
+      this.context.post('/').reply(200);
+
+      return this.http.execute(request).then(() => {
+        assert.equal(this.http.serializeRequest.called, true);
+        assert.equal(this.http.serializeRequest.calledWith(request), true);
+      });
     });
 
     it('parses 200-level response', function () {
