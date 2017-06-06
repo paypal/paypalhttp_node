@@ -54,6 +54,56 @@ describe('HttpClient', function () {
     });
   });
 
+  describe('serializeRequest', function () {
+    it('throws an error if subclass does not impliment it', function () {
+      class CustomHttpClient extends braintreehttp.HttpClient {
+      }
+
+      let client = new CustomHttpClient();
+
+      assert.throws(() => {
+        client.serializeRequest();
+      }, /^serializeRequest not implimented$/);
+    });
+
+    it('calls the subclass method when implimented', function () {
+      class CustomHttpClient extends braintreehttp.HttpClient {
+        serializeRequest() {
+          return 'ok';
+        }
+      }
+
+      let client = new CustomHttpClient();
+
+      assert.equal(client.serializeRequest(), 'ok');
+    });
+  });
+
+  describe('deserializeResponse', function () {
+    it('throws an error if subclass does not impliment it', function () {
+      class CustomHttpClient extends braintreehttp.HttpClient {
+      }
+
+      let client = new CustomHttpClient();
+
+      assert.throws(() => {
+        client.deserializeResponse();
+      }, /^deserializeResponse not implimented$/);
+    });
+
+    it('calls the subclass method when implimented', function () {
+      class CustomHttpClient extends braintreehttp.HttpClient {
+        deserializeResponse() {
+          return 'ok';
+        }
+      }
+
+      let client = new CustomHttpClient();
+
+      assert.equal(client.deserializeResponse(), 'ok');
+    });
+  });
+
   describe('execute', function () {
     it('initialized with environment and base url', function () {
       assert.equal(http.environment.baseUrl, 'https://localhost');
