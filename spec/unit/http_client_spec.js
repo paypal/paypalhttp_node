@@ -12,23 +12,21 @@ class BTJsonHttpClient extends braintreehttp.HttpClient {
 
 describe('HttpClient', function () {
   let environment = new braintreehttp.Environment('https://localhost');
-  let context = null;
-  let http = null;
 
   beforeEach(function () {
-    context = nock(environment.baseUrl);
-    http = new braintreehttp.HttpClient(environment);
+    this.context = nock(environment.baseUrl);
+    this.http = new braintreehttp.HttpClient(environment);
   });
 
   describe('getUserAgent', function () {
     it('returns the user agent', function () {
-      assert.equal(http.getUserAgent(), 'BraintreeHttp-Node HTTP/1.1');
+      assert.equal(this.http.getUserAgent(), 'BraintreeHttp-Node HTTP/1.1');
     });
   });
 
   describe('getTimeout', function () {
     it('returns the timeout of 30 seconds', function () {
-      assert.equal(http.getTimeout(), 30000);
+      assert.equal(this.http.getTimeout(), 30000);
     });
   });
 
@@ -40,16 +38,16 @@ describe('HttpClient', function () {
 
       let injector = new CustomInjector();
 
-      assert.equal(http._injectors.length, 0);
+      assert.equal(this.http._injectors.length, 0);
 
-      http.addInjector(injector);
+      this.http.addInjector(injector);
 
-      assert.equal(http._injectors.length, 1);
+      assert.equal(this.http._injectors.length, 1);
     });
 
     it('throws an error if injector is not of class Injector', function () {
       assert.throws(() => {
-        http.addInjector({});
+        this.http.addInjector({});
       }, /^injector must be an instance of Injector$/);
     });
   });
@@ -106,7 +104,7 @@ describe('HttpClient', function () {
 
   describe('execute', function () {
     it('initialized with environment and base url', function () {
-      assert.equal(http.environment.baseUrl, 'https://localhost');
+      assert.equal(this.http.environment.baseUrl, 'https://localhost');
     });
 
     it('uses injectors to modify a request', function () {
@@ -114,7 +112,7 @@ describe('HttpClient', function () {
         'some-key': 'Some Value'
       };
 
-      context.get('/')
+      this.context.get('/')
         .reply(200, function (uri, body) {
           assert.equal(this.req.headers['some-key'], headers['some-key']);
         });
@@ -125,14 +123,14 @@ describe('HttpClient', function () {
         }
       }
 
-      http.addInjector(new CustomInjector());
+      this.http.addInjector(new CustomInjector());
 
       let request = {
         method: 'GET',
         path: '/'
       };
 
-      return http.execute(request);
+      return this.http.execute(request);
     });
 
     it('sets user agent if not set', function () {
@@ -141,12 +139,12 @@ describe('HttpClient', function () {
         path: '/'
       };
 
-      context.get('/')
+      this.context.get('/')
         .reply(200, function (uri, body) {
           assert.equal(this.req.headers['user-agent'], 'BraintreeHttp-Node HTTP/1.1');
         });
 
-      return http.execute(request);
+      return this.http.execute(request);
     });
 
     it('does not override user agent if set', function () {
@@ -156,12 +154,12 @@ describe('HttpClient', function () {
         headers: {'User-Agent': 'Not Node/1.1'}
       };
 
-      context.get('/')
+      this.context.get('/')
         .reply(200, function (uri, body) {
           assert.equal(this.req.headers['user-agent'], 'Not Node/1.1');
         });
 
-      return http.execute(request);
+      return this.http.execute(request);
     });
 
     it('uses body in request', function () {
@@ -174,24 +172,24 @@ describe('HttpClient', function () {
         }
       };
 
-      context.post('/')
+      this.context.post('/')
       .reply(200, function (uri, body) {
         body = JSON.parse(body);
         assert.equal(body.someKey, 'val');
         assert.equal(body.someVal, 'val2');
       });
 
-      return http.execute(request);
+      return this.http.execute(request);
     });
 
     it('parses 200-level response', function () {
-      http = new BTJsonHttpClient(environment);
+      let http = new BTJsonHttpClient(environment);
       let request = {
         method: 'GET',
         path: '/'
       };
 
-      context.get('/')
+      this.context.get('/')
       .reply(200, function (uri, body) {
         return JSON.stringify({
           data: 1,
@@ -213,12 +211,12 @@ describe('HttpClient', function () {
         path: '/'
       };
 
-      context.get('/')
+      this.context.get('/')
         .reply(400, 'some data about this error', {
           'request-id': '1234'
         });
 
-      return http.execute(request)
+      return this.http.execute(request)
         .then((resp) => {
           assert.fail('then shouldn\'t be called for 400 status code');
         })
@@ -235,10 +233,10 @@ describe('HttpClient', function () {
         path: '/some/path'
       };
 
-      context.get(request.path)
+      this.context.get(request.path)
         .reply(200);
 
-      return http.execute(request);
+      return this.http.execute(request);
     });
 
     it('makes a request when full url is specified', function () {
