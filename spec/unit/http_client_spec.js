@@ -5,6 +5,12 @@ let braintreehttp = require('../../lib/braintreehttp');
 let nock = require('nock');
 
 class BTJsonHttpClient extends braintreehttp.HttpClient {
+  serializeRequest() {
+    return 'request';
+  }
+  deserializeResponse() {
+    return 'response';
+  }
   parseResponseBody(data, headers) {
     return JSON.parse(data);
   }
@@ -14,8 +20,17 @@ describe('HttpClient', function () {
   let environment = new braintreehttp.Environment('https://localhost');
 
   beforeEach(function () {
+    class CustomHttpClient extends braintreehttp.HttpClient {
+      serializeRequest() {
+        return 'request';
+      }
+      deserializeResponse() {
+        return 'response';
+      }
+    }
+
     this.context = nock(environment.baseUrl);
-    this.http = new braintreehttp.HttpClient(environment);
+    this.http = new CustomHttpClient(environment);
   });
 
   describe('getUserAgent', function () {
@@ -55,12 +70,13 @@ describe('HttpClient', function () {
   describe('serializeRequest', function () {
     it('throws an error if subclass does not impliment it', function () {
       class CustomHttpClient extends braintreehttp.HttpClient {
+        deserializeResponse() {
+          return 'response';
+        }
       }
 
-      let client = new CustomHttpClient();
-
       assert.throws(() => {
-        client.serializeRequest();
+        let client = new CustomHttpClient();
       }, /^serializeRequest not implimented$/);
     });
 
@@ -68,6 +84,9 @@ describe('HttpClient', function () {
       class CustomHttpClient extends braintreehttp.HttpClient {
         serializeRequest() {
           return 'ok';
+        }
+        deserializeResponse() {
+          return 'response';
         }
       }
 
@@ -80,17 +99,21 @@ describe('HttpClient', function () {
   describe('deserializeResponse', function () {
     it('throws an error if subclass does not impliment it', function () {
       class CustomHttpClient extends braintreehttp.HttpClient {
+        serializeRequest() {
+          return 'request';
+        }
       }
 
-      let client = new CustomHttpClient();
-
       assert.throws(() => {
-        client.deserializeResponse();
+        let client = new CustomHttpClient();
       }, /^deserializeResponse not implimented$/);
     });
 
     it('calls the subclass method when implimented', function () {
       class CustomHttpClient extends braintreehttp.HttpClient {
+        serializeRequest() {
+          return 'request';
+        }
         deserializeResponse() {
           return 'ok';
         }
