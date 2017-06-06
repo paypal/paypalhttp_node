@@ -32,6 +32,28 @@ describe('HttpClient', function () {
     });
   });
 
+  describe('addInjector', function () {
+    it('adds to the injectors array', function () {
+      class CustomInjector extends braintreehttp.Injector {
+        inject() {}
+      }
+
+      let injector = new CustomInjector();
+
+      assert.equal(http._injectors.length, 0);
+
+      http.addInjector(injector);
+
+      assert.equal(http._injectors.length, 1);
+    });
+
+    it('throws an error if injector is not of class Injector', function () {
+      assert.throws(() => {
+        http.addInjector({});
+      }, /^injector must be an instance of Injector$/);
+    });
+  });
+
   describe('execute', function () {
     it('initialized with environment and base url', function () {
       assert.equal(http.environment.baseUrl, 'https://localhost');
