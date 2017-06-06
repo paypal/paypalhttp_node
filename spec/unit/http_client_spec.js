@@ -26,6 +26,12 @@ describe('HttpClient', function () {
     });
   });
 
+  describe('getTimeout', function () {
+    it('returns the timeout of 30 seconds', function () {
+      assert.equal(http.getTimeout(), 30000);
+    });
+  });
+
   describe('execute', function () {
     it('initialized with environment and base url', function () {
       assert.equal(http.environment.baseUrl, 'https://localhost');
