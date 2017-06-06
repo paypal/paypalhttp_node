@@ -4,16 +4,18 @@
 let braintreehttp = require('../../lib/braintreehttp');
 let nock = require('nock');
 let sinon = require('sinon');
+let http = require('http');
 
 class BTJsonHttpClient extends braintreehttp.HttpClient {
-  serializeRequest() {
-    return 'request';
+  serializeRequest(request) {
+    return JSON.stringify(request.body);
   }
-  deserializeResponse() {
-    return 'response';
-  }
-  parseResponseBody(data, headers) {
-    return JSON.parse(data);
+  deserializeResponse(body, headers) {
+    if (headers && headers['content-type'] === 'application/json') {
+      return JSON.parse(body);
+    }
+
+    throw new Error('Unsupported Content-Type: ' + headers['Content-Type']);
   }
 }
 
@@ -25,8 +27,8 @@ describe('HttpClient', function () {
       serializeRequest(request) {
         return JSON.stringify(request.body);
       }
-      deserializeResponse() {
-        return 'response';
+      deserializeResponse(body) {
+        return body;
       }
     }
 
@@ -267,12 +269,8 @@ describe('HttpClient', function () {
         path: '/'
       };
 
-      this.context.get('/')
-      .reply(200, function (uri, body) {
-        return JSON.stringify({
-          data: 1,
-          key: 'val'
-        });
+      this.context.get('/').reply(200, '{"data":1,"key":"val"}', {
+        'Content-Type': 'application/json'
       });
 
       return http.execute(request)
@@ -289,10 +287,10 @@ describe('HttpClient', function () {
         path: '/'
       };
 
-      this.context.get('/')
-        .reply(400, 'some data about this error', {
-          'request-id': '1234'
-        });
+      this.context.get('/').reply(400, 'some data about this error', {
+        'Content-Type': 'application/json',
+        'request-id': '1234'
+      });
 
       return this.http.execute(request)
         .then((resp) => {
@@ -300,7 +298,7 @@ describe('HttpClient', function () {
         })
         .catch((error) => {
           assert.equal(error.statusCode, 400);
-          assert.equal(error.result, 'some data about this error');
+          assert.equal(error.message, 'some data about this error');
           assert.equal(error.headers['request-id'], '1234');
         });
     });
