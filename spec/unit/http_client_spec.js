@@ -4,7 +4,6 @@
 let braintreehttp = require('../../lib/braintreehttp');
 let nock = require('nock');
 let sinon = require('sinon');
-let http = require('http');
 
 class BTJsonHttpClient extends braintreehttp.HttpClient {
   serializeRequest(request) {
@@ -50,11 +49,7 @@ describe('HttpClient', function () {
 
   describe('addInjector', function () {
     it('adds to the injectors array', function () {
-      class CustomInjector extends braintreehttp.Injector {
-        inject() {}
-      }
-
-      let injector = new CustomInjector();
+      function injector(request) {}
 
       assert.equal(this.http._injectors.length, 0);
 
@@ -63,15 +58,25 @@ describe('HttpClient', function () {
       assert.equal(this.http._injectors.length, 1);
     });
 
-    it('throws an error if injector is not of class Injector', function () {
+    it('throws an error if injector is not a function', function () {
       assert.throws(() => {
         this.http.addInjector({});
-      }, /^injector must be an instance of Injector$/);
+      }, /^injector must be a function that takes one argument$/);
+    });
+
+    it('throws an error if injector takes no or > 1 arguments', function () {
+      assert.throws(() => {
+        this.http.addInjector(function () {});
+      }, /^injector must be a function that takes one argument$/);
+
+      assert.throws(() => {
+        this.http.addInjector(function (one, two) {});
+      }, /^injector must be a function that takes one argument$/);
     });
   });
 
   describe('serializeRequest', function () {
-    it('throws an error if subclass does not impliment it', function () {
+    it('throws an error if subclass does not implement it', function () {
       class CustomHttpClient extends braintreehttp.HttpClient {
         deserializeResponse() {
           return 'response';
@@ -80,10 +85,10 @@ describe('HttpClient', function () {
 
       assert.throws(() => {
         let client = new CustomHttpClient();
-      }, /^serializeRequest not implimented$/);
+      }, /^serializeRequest not implemented$/);
     });
 
-    it('calls the subclass method when implimented', function () {
+    it('calls the subclass method when implemented', function () {
       class CustomHttpClient extends braintreehttp.HttpClient {
         serializeRequest() {
           return 'ok';
@@ -100,7 +105,7 @@ describe('HttpClient', function () {
   });
 
   describe('deserializeResponse', function () {
-    it('throws an error if subclass does not impliment it', function () {
+    it('throws an error if subclass does not implement it', function () {
       class CustomHttpClient extends braintreehttp.HttpClient {
         serializeRequest() {
           return 'request';
@@ -109,10 +114,10 @@ describe('HttpClient', function () {
 
       assert.throws(() => {
         let client = new CustomHttpClient();
-      }, /^deserializeResponse not implimented$/);
+      }, /^deserializeResponse not implemented$/);
     });
 
-    it('calls the subclass method when implimented', function () {
+    it('calls the subclass method when implemented', function () {
       class CustomHttpClient extends braintreehttp.HttpClient {
         serializeRequest() {
           return 'request';
@@ -143,13 +148,11 @@ describe('HttpClient', function () {
           assert.equal(this.req.headers['some-key'], headers['some-key']);
         });
 
-      class CustomInjector extends braintreehttp.Injector {
-        inject(request) {
-          request.headers = headers;
-        }
+      function injector(request) {
+        request.headers = headers;
       }
 
-      this.http.addInjector(new CustomInjector());
+      this.http.addInjector(injector);
 
       let request = {
         method: 'GET',

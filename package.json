@@ -1,5 +1,5 @@
 {
-  "name": "braintreehttp-node",
+  "name": "braintreehttp",
   "version": "1.0.0",
   "description": "A library for integrating with BraintreeHttp.",
   "keywords": [
