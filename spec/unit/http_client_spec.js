@@ -155,7 +155,7 @@ describe('HttpClient', function () {
       this.http.addInjector(injector);
 
       let request = {
-        method: 'GET',
+        verb: 'GET',
         path: '/'
       };
 
@@ -164,7 +164,7 @@ describe('HttpClient', function () {
 
     it('sets user agent if not set', function () {
       let request = {
-        method: 'GET',
+        verb: 'GET',
         path: '/'
       };
 
@@ -178,7 +178,7 @@ describe('HttpClient', function () {
 
     it('sets user agent if user agent set to Node', function () {
       let request = {
-        method: 'GET',
+        verb: 'GET',
         path: '/',
         headers: {'User-Agent': 'Node'}
       };
@@ -193,7 +193,7 @@ describe('HttpClient', function () {
 
     it('does not override user agent if set', function () {
       let request = {
-        method: 'GET',
+        verb: 'GET',
         path: '/',
         headers: {'User-Agent': 'Not Node/1.1'}
       };
@@ -208,7 +208,7 @@ describe('HttpClient', function () {
 
     it('uses body in request', function () {
       let request = {
-        method: 'POST',
+        verb: 'POST',
         path: '/',
         body: {
           someKey: 'val',
@@ -227,7 +227,7 @@ describe('HttpClient', function () {
 
     it('uses provided body if it is a string', function () {
       let request = {
-        method: 'POST',
+        verb: 'POST',
         path: '/',
         body: '{"someKey":"val","someVal":"val2"}'
       };
@@ -247,7 +247,7 @@ describe('HttpClient', function () {
 
     it('users serialize function if body is not a string', function () {
       let request = {
-        method: 'POST',
+        verb: 'POST',
         path: '/',
         body: {
           someKey: 'val',
@@ -268,7 +268,7 @@ describe('HttpClient', function () {
     it('parses 200-level response', function () {
       let http = new BTJsonHttpClient(environment);
       let request = {
-        method: 'GET',
+        verb: 'GET',
         path: '/'
       };
 
@@ -286,7 +286,7 @@ describe('HttpClient', function () {
 
     it('rejects promise with error on non 200-level response', function () {
       let request = {
-        method: 'GET',
+        verb: 'GET',
         path: '/'
       };
 
@@ -308,7 +308,7 @@ describe('HttpClient', function () {
 
     it('makes a request when only a path is specified', function () {
       let request = {
-        method: 'GET',
+        verb: 'GET',
         path: '/some/path'
       };
 
@@ -320,7 +320,7 @@ describe('HttpClient', function () {
 
     it('makes a request when full url is specified', function () {
       let request = {
-        method: 'GET',
+        verb: 'GET',
         path: 'http://some.otherhost.org/some/path'
       };
     });
