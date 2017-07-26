@@ -4,6 +4,7 @@
 let braintreehttp = require('../../lib/braintreehttp');
 let nock = require('nock');
 let sinon = require('sinon');
+let fs = require('fs');
 
 class BTJsonHttpClient extends braintreehttp.HttpClient {
   serializeRequest(request) {
@@ -242,6 +243,35 @@ describe('HttpClient', function () {
 
       return this.http.execute(request).then(() => {
         assert.equal(this.http.serializeRequest.called, false);
+      });
+    });
+
+    it('serializes multipart request correctly', function () {
+      let request = {
+        verb: 'POST',
+        path: '/',
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        body: {
+          file: fs.createReadStream('./README.md'),
+          key: 'value'
+        }
+      };
+
+      this.context.post('/').reply(200, function (uri, body) {
+        assert.include(this.req.headers['content-type'], 'multipart/form-data; boundary=boundary');
+
+        let filedata = fs.readFileSync('./README.md');
+
+        assert.include(body, 'Content-Disposition: form-data; name="file"; filename="README.md"\r\nContent-Type: application/octet-stream');
+        assert.include(body, filedata);
+        assert.include(body, 'Content-Disposition: form-data; name="key"');
+        assert.include(body, 'value');
+      });
+
+      return this.http.execute(request).then((resp) => {
+        assert.equal(resp.statusCode, 200);
       });
     });
 
