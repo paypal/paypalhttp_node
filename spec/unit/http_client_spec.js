@@ -6,19 +6,6 @@ let nock = require('nock');
 let sinon = require('sinon');
 let fs = require('fs');
 
-class BTJsonHttpClient extends braintreehttp.HttpClient {
-  serializeRequest(request) {
-    return JSON.stringify(request.body);
-  }
-  deserializeResponse(body, headers) {
-    if (headers && headers['content-type'] === 'application/json') {
-      return JSON.parse(body);
-    }
-
-    throw new Error('Unsupported Content-Type: ' + headers['Content-Type']);
-  }
-}
-
 describe('HttpClient', function () {
   let environment = new braintreehttp.Environment('https://localhost');
 
@@ -77,18 +64,6 @@ describe('HttpClient', function () {
   });
 
   describe('serializeRequest', function () {
-    it('throws an error if subclass does not implement it', function () {
-      class CustomHttpClient extends braintreehttp.HttpClient {
-        deserializeResponse() {
-          return 'response';
-        }
-      }
-
-      assert.throws(() => {
-        let client = new CustomHttpClient();
-      }, /^serializeRequest not implemented$/);
-    });
-
     it('calls the subclass method when implemented', function () {
       class CustomHttpClient extends braintreehttp.HttpClient {
         serializeRequest() {
@@ -106,18 +81,6 @@ describe('HttpClient', function () {
   });
 
   describe('deserializeResponse', function () {
-    it('throws an error if subclass does not implement it', function () {
-      class CustomHttpClient extends braintreehttp.HttpClient {
-        serializeRequest() {
-          return 'request';
-        }
-      }
-
-      assert.throws(() => {
-        let client = new CustomHttpClient();
-      }, /^deserializeResponse not implemented$/);
-    });
-
     it('calls the subclass method when implemented', function () {
       class CustomHttpClient extends braintreehttp.HttpClient {
         serializeRequest() {
@@ -296,7 +259,7 @@ describe('HttpClient', function () {
     });
 
     it('parses 200-level response', function () {
-      let http = new BTJsonHttpClient(environment);
+      let http = new braintreehttp.HttpClient(environment);
       let request = {
         verb: 'GET',
         path: '/'
