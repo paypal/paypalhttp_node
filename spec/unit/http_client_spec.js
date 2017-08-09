@@ -7,7 +7,7 @@ let sinon = require('sinon');
 let fs = require('fs');
 
 describe('HttpClient', function () {
-  let environment = new braintreehttp.Environment('https://localhost');
+  let environment = new braintreehttp.Environment('https://localhost:5000');
 
   beforeEach(function () {
     class CustomHttpClient extends braintreehttp.HttpClient {
@@ -99,7 +99,7 @@ describe('HttpClient', function () {
 
   describe('execute', function () {
     it('initialized with environment and base url', function () {
-      assert.equal(this.http.environment.baseUrl, 'https://localhost');
+      assert.equal(this.http.environment.baseUrl, 'https://localhost:5000');
     });
 
     it('uses injectors to modify a request', function () {
