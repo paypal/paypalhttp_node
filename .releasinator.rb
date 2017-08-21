@@ -11,6 +11,19 @@ def _test_with_dockerfile(tag)
   CommandProcessor.command("docker run #{tag}", live_output=true)
 end
 
+def package_version
+	/braintreehttp: '(\d+\.\d+\.\d+)'/.match(`npm version`)[1]
+end
+
+def validate_version_match
+	if package_version != @current_release.version
+		Printer.fail("package version #{package_version} does not match changelog version #{@current_release.version}.")
+		abort()
+	end
+
+	Printer.success("package version #{package_version} matches latest changelog version #{@current_release.version}.")
+end
+
 configatron.custom_validation_methods = [
 	method(:validate_version_match),
   method(:test)
