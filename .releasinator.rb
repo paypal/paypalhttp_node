@@ -1,18 +1,24 @@
+require 'securerandom'
+
 configatron.product_name = "BraintreeHttp Node"
 
 # Custom validations
 def test
-  tag = Time.now.to_i
-  _test_with_dockerfile(tag)
+  ["4", "6", "7", "8"].each do |version|
+    _test_with_dockerfile(version)
+  end
 end
 
-def _test_with_dockerfile(tag)
-  CommandProcessor.command("docker build -t #{tag} .")
+def _test_with_dockerfile(node_version)
+  tag = SecureRandom.uuid
+  CommandProcessor.command("docker build -t #{tag} --build-arg NODE_VERSION=#{node_version} .")
   CommandProcessor.command("docker run #{tag}", live_output=true)
 end
 
 def package_version
-	/braintreehttp: '(\d+\.\d+\.\d+)'/.match(`npm version`)[1]
+	regex = /braintreehttp: '(\d+\.\d+\.\d+)'/
+	puts regex
+	regex.match(`npm version`)[1]
 end
 
 def validate_version_match

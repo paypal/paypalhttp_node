@@ -1,6 +1,7 @@
 GIT
   remote: https://github.com/sashaweiss/releasinator.git
-  revision: 88f59c9ed3d0e8a52561d891b3aa4e711f578c5f
+  revision: 190a3ad064b83ab82a2d6922eb2af3030fe99b01
+  branch: meta-prompt
   specs:
     releasinator (0.6.4)
       colorize (~> 0.7)

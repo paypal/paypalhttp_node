@@ -62,7 +62,7 @@ client.addInjector((req) => {
 
 The Promise returned by `HttpClient#execute` maybe be rejected if something went wrong during the course of execution. If the server returned a non-200 response, this error will be an object that contains a status code, headers, and any data that was returned for debugging.
 
-```java
+```js
 client.execute(req)
   .then((resp) => {
     let statusCode = resp.statusCode;
@@ -84,3 +84,8 @@ client.execute(req)
 ### Serializer
 (De)Serialization of request and response data is done by instances of [`Encoder`](./lib/braintreehttp/encoder.js). BraintreeHttp currently supports `json` encoding out of the box.
 
+## License
+BraintreeHttp-Node is open source and available under the MIT license. See the [LICENSE](./LICENSE) file for more info.
+
+## Contributing
+Pull requests and issues are welcome. Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
