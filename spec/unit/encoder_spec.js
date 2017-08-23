@@ -20,6 +20,17 @@ describe('encoder', function () {
       assert.equal(encoder.serializeRequest(req), '{"one":"two","three":["one","two","three"]}');
     });
 
+    it('serializes a request with content-type == text/*', function () {
+      let req = {
+        headers: {
+          'Content-Type': 'text/asdf'
+        },
+        body: 'some asdf text'
+      };
+
+      assert.equal(encoder.serializeRequest(req), 'some asdf text');
+    });
+
     it('throws when content-type not application/json', function () {
       let req = {
         headers: {
@@ -31,7 +42,7 @@ describe('encoder', function () {
         }
       };
 
-      assert.throws(() => encoder.serializeRequest(req), Error, 'Unable to serialize request with Content-Type not application/json. Supported encodings are application/json');
+      assert.throws(() => encoder.serializeRequest(req), Error, 'Unable to serialize request with Content-Type not application/json. Supported encodings are [/^application\\/json$/, /^text\\/.*/]');
     });
 
     it('throws when headers undefined', function () {
@@ -58,13 +69,22 @@ describe('encoder', function () {
       assert.deepEqual(deserialized.three, ['one', 'two', 'three']);
     });
 
+    it('deserializes a response with content-type == text/*', function () {
+      let headers = {
+        'content-type': 'text/asdf'
+      };
+      let body = 'some asdf text';
+
+      assert.equal(encoder.deserializeResponse(body, headers), body);
+    });
+
     it('throws when content-type not application/json', function () {
       let headers = {
         'content-type': 'not application/json'
       };
       let body = '{"one":"two","three":["one","two","three"]}';
 
-      assert.throws(() => encoder.deserializeResponse(body, headers), Error, 'Unable to deserialize response with Content-Type not application/json. Supported decodings are application/json');
+      assert.throws(() => encoder.deserializeResponse(body, headers), Error, 'Unable to deserialize response with Content-Type not application/json. Supported decodings are [/^application\\/json$/, /^text\\/.*/]');
     });
 
     it('throws when headers undefined', function () {
