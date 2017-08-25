@@ -32,7 +32,9 @@ describe('encoder', function () {
       assert.equal(encoder.serializeRequest(req), 'some asdf text');
     });
 
-    it('serializes ar request with content-type multipart/*', function () {
+    it('serializes a request with content-type multipart/*', function () {
+      let fp = './spec/unit/resources/fileupload_test_binary.jpg';
+
       let request = {
         verb: 'POST',
         path: '/',
@@ -40,7 +42,7 @@ describe('encoder', function () {
           'Content-Type': 'multipart/form-data'
         },
         body: {
-          file: fs.createReadStream('./README.md'),
+          file: fs.createReadStream(fp),
           key: 'value'
         }
       };
@@ -49,9 +51,9 @@ describe('encoder', function () {
 
       assert.include(request.headers['content-type'], 'multipart/form-data; boundary=boundary');
 
-      let filedata = fs.readFileSync('./README.md');
+      let filedata = fs.readFileSync(fp);
 
-      assert.include(encoded, 'Content-Disposition: form-data; name="file"; filename="README.md"\r\nContent-Type: application/octet-stream');
+      assert.include(encoded, 'Content-Disposition: form-data; name="file"; filename="fileupload_test_binary.jpg"\r\nContent-Type: image/jpeg');
       assert.include(encoded, filedata);
       assert.include(encoded, 'Content-Disposition: form-data; name="key"');
       assert.include(encoded, 'value');
