@@ -10,17 +10,8 @@ describe('HttpClient', function () {
   let environment = new braintreehttp.Environment('https://localhost:5000');
 
   beforeEach(function () {
-    class CustomHttpClient extends braintreehttp.HttpClient {
-      serializeRequest(request) {
-        return JSON.stringify(request.body);
-      }
-      deserializeResponse(body) {
-        return body;
-      }
-    }
-
     this.context = nock(environment.baseUrl);
-    this.http = new CustomHttpClient(environment);
+    this.http = new braintreehttp.HttpClient(environment);
   });
 
   describe('getUserAgent', function () {
@@ -203,36 +194,18 @@ describe('HttpClient', function () {
         body: {
           someKey: 'val',
           someVal: 'val2'
+        },
+        headers: {
+          'Content-Type': 'application/json'
         }
       };
 
       this.context.post('/').reply(200, function (uri, body) {
-        body = JSON.parse(body);
         assert.equal(body.someKey, 'val');
         assert.equal(body.someVal, 'val2');
       });
 
       return this.http.execute(request);
-    });
-
-    it('uses provided body if it is a string', function () {
-      let request = {
-        verb: 'POST',
-        path: '/',
-        body: '{"someKey":"val","someVal":"val2"}'
-      };
-
-      sinon.spy(this.http, 'serializeRequest');
-
-      this.context.post('/').reply(200, function (uri, body) {
-        body = JSON.parse(body);
-        assert.equal(body.someKey, 'val');
-        assert.equal(body.someVal, 'val2');
-      });
-
-      return this.http.execute(request).then(() => {
-        assert.equal(this.http.serializeRequest.called, false);
-      });
     });
 
     it('serializes multipart request correctly', function () {
@@ -261,26 +234,6 @@ describe('HttpClient', function () {
 
       return this.http.execute(request).then((resp) => {
         assert.equal(resp.statusCode, 200);
-      });
-    });
-
-    it('uses serialize function if body is not a string', function () {
-      let request = {
-        verb: 'POST',
-        path: '/',
-        body: {
-          someKey: 'val',
-          someVal: 'val2'
-        }
-      };
-
-      sinon.spy(this.http, 'serializeRequest');
-
-      this.context.post('/').reply(200);
-
-      return this.http.execute(request).then(() => {
-        assert.isTrue(this.http.serializeRequest.calledOnce);
-        assert.isTrue(this.http.serializeRequest.calledWithMatch(request));
       });
     });
 
