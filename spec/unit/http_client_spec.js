@@ -126,6 +126,32 @@ describe('HttpClient', function () {
       return this.http.execute(request);
     });
 
+    it('does not mutate requests with injectors', function () {
+      let headers = {
+        'some-key': 'Some Value'
+      };
+
+      this.context.get('/')
+        .reply(200, function (uri, body) {
+          assert.equal(this.req.headers['some-key'], headers['some-key']);
+        });
+
+      function injector(request) {
+        request.headers = headers;
+      }
+
+      this.http.addInjector(injector);
+
+      let request = {
+        verb: 'GET',
+        path: '/'
+      };
+
+      return this.http.execute(request).then(() => {
+        assert.equal(null, request.headers);
+      });
+    });
+
     it('sets user agent if not set', function () {
       let request = {
         verb: 'GET',
@@ -238,7 +264,7 @@ describe('HttpClient', function () {
       });
     });
 
-    it('users serialize function if body is not a string', function () {
+    it('uses serialize function if body is not a string', function () {
       let request = {
         verb: 'POST',
         path: '/',
@@ -253,8 +279,8 @@ describe('HttpClient', function () {
       this.context.post('/').reply(200);
 
       return this.http.execute(request).then(() => {
-        assert.equal(this.http.serializeRequest.called, true);
-        assert.equal(this.http.serializeRequest.calledWith(request), true);
+        assert.isTrue(this.http.serializeRequest.calledOnce);
+        assert.isTrue(this.http.serializeRequest.calledWithMatch(request));
       });
     });
 
