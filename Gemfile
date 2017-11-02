@@ -2,4 +2,4 @@
 source "https://rubygems.org"
 
 gem "rake"
-gem "releasinator", '0.7.1'
+gem "releasinator", '0.7.6'
