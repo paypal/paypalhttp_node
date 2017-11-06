@@ -54,40 +54,6 @@ describe('HttpClient', function () {
     });
   });
 
-  describe('serializeRequest', function () {
-    it('calls the subclass method when implemented', function () {
-      class CustomHttpClient extends braintreehttp.HttpClient {
-        serializeRequest() {
-          return 'ok';
-        }
-        deserializeResponse() {
-          return 'response';
-        }
-      }
-
-      let client = new CustomHttpClient();
-
-      assert.equal(client.serializeRequest(), 'ok');
-    });
-  });
-
-  describe('deserializeResponse', function () {
-    it('calls the subclass method when implemented', function () {
-      class CustomHttpClient extends braintreehttp.HttpClient {
-        serializeRequest() {
-          return 'request';
-        }
-        deserializeResponse() {
-          return 'ok';
-        }
-      }
-
-      let client = new CustomHttpClient();
-
-      assert.equal(client.deserializeResponse(), 'ok');
-    });
-  });
-
   describe('execute', function () {
     it('initialized with environment and base url', function () {
       assert.equal(this.http.environment.baseUrl, 'https://localhost:5000');
