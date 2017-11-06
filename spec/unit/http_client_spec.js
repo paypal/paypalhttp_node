@@ -83,7 +83,7 @@ describe('HttpClient', function () {
       return this.http.execute(request);
     });
 
-    it('does not mutate requests with injectors', function () {
+    it('does not mutate original request', function () {
       let headers = {
         'some-key': 'Some Value'
       };

@@ -7,10 +7,49 @@ describe('encoder', function () {
   let encoder = new braintreehttp.Encoder();
 
   describe('serializeRequest', function () {
+    it('throws when content-type not supported', function () {
+      let req = {
+        headers: {
+          'Content-Type': 'not application/json'
+        },
+        body: {
+          one: 'two',
+          three: ['one', 'two', 'three']
+        }
+      };
+
+      assert.throws(() => encoder.serializeRequest(req), Error, 'Unable to serialize request with Content-Type not application/json. Supported encodings are [/^application\\/json/, /^text\\/.*/, /^multipart\\/.*/]');
+    });
+
+    it('throws when headers undefined', function () {
+      let req = {
+        body: {
+          one: 'two',
+          three: ['one', 'two', 'three']
+        }
+      };
+
+      assert.throws(() => encoder.serializeRequest(req), Error, 'HttpRequest does not have Content-Type header set');
+    });
+
+    it('throws when content-type header not present', function () {
+      let req = {
+        headers: {
+          'User-Agent': 'some user agent'
+        },
+        body: {
+          one: 'two',
+          three: ['one', 'two', 'three']
+        }
+      };
+
+      assert.throws(() => encoder.serializeRequest(req), Error, 'HttpRequest does not have Content-Type header set');
+    });
+
     it('serializes a request with content-type == application/json', function () {
       let req = {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json; charset=utf8'
         },
         body: {
           one: 'two',
@@ -24,7 +63,7 @@ describe('encoder', function () {
     it('serializes a request with content-type == text/*', function () {
       let req = {
         headers: {
-          'Content-Type': 'text/asdf'
+          'Content-Type': 'text/asdf; charset=utf8'
         },
         body: 'some asdf text'
       };
@@ -39,7 +78,7 @@ describe('encoder', function () {
         verb: 'POST',
         path: '/',
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data; charset=utf8'
         },
         body: {
           file: fs.createReadStream(fp),
@@ -58,37 +97,12 @@ describe('encoder', function () {
       assert.include(encoded, 'Content-Disposition: form-data; name="key"');
       assert.include(encoded, 'value');
     });
-
-    it('throws when content-type not supported', function () {
-      let req = {
-        headers: {
-          'Content-Type': 'not application/json'
-        },
-        body: {
-          one: 'two',
-          three: ['one', 'two', 'three']
-        }
-      };
-
-      assert.throws(() => encoder.serializeRequest(req), Error, 'Unable to serialize request with Content-Type not application/json. Supported encodings are [/^application\\/json$/, /^text\\/.*/, /^multipart\\/.*/]');
-    });
-
-    it('throws when headers undefined', function () {
-      let req = {
-        body: {
-          one: 'two',
-          three: ['one', 'two', 'three']
-        }
-      };
-
-      assert.throws(() => encoder.serializeRequest(req), Error, 'HttpRequest does not have Content-Type header set');
-    });
   });
 
   describe('deserializeResponse', function () {
     it('deserializes a response with content-type == application/json', function () {
       let headers = {
-        'content-type': 'application/json'
+        'content-type': 'application/json; charset=utf8'
       };
       let body = '{"one":"two","three":["one","two","three"]}';
       let deserialized = encoder.deserializeResponse(body, headers);
@@ -99,7 +113,7 @@ describe('encoder', function () {
 
     it('deserializes a response with content-type == text/*', function () {
       let headers = {
-        'content-type': 'text/asdf'
+        'content-type': 'text/asdf; charset=utf8'
       };
       let body = 'some asdf text';
 
@@ -108,7 +122,7 @@ describe('encoder', function () {
 
     it('throws when response content-type multipart/*', function () {
       let headers = {
-        'content-type': 'multipart/form-data'
+        'content-type': 'multipart/form-data; charset=utf8'
       };
 
       let body = 'some form data';
@@ -118,11 +132,11 @@ describe('encoder', function () {
 
     it('throws when content-type not supported', function () {
       let headers = {
-        'content-type': 'not application/json'
+        'content-type': 'not application/json; charset=utf8'
       };
       let body = '{"one":"two","three":["one","two","three"]}';
 
-      assert.throws(() => encoder.deserializeResponse(body, headers), Error, 'Unable to deserialize response with Content-Type not application/json. Supported decodings are [/^application\\/json$/, /^text\\/.*/, /^multipart\\/.*/]');
+      assert.throws(() => encoder.deserializeResponse(body, headers), Error, 'Unable to deserialize response with Content-Type not application/json; charset=utf8. Supported decodings are [/^application\\/json/, /^text\\/.*/, /^multipart\\/.*/]');
     });
 
     it('throws when headers undefined', function () {
