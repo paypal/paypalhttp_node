@@ -18,7 +18,7 @@ describe('encoder', function () {
         }
       };
 
-      assert.throws(() => encoder.serializeRequest(req), Error, 'Unable to serialize request with Content-Type not application/json. Supported encodings are [/^application\\/json/, /^text\\/.*/, /^multipart\\/.*/]');
+      assert.throws(() => encoder.serializeRequest(req), Error, 'Unable to serialize request with Content-Type not application/json. Supported encodings are ');
     });
 
     it('throws when headers undefined', function () {
@@ -97,6 +97,24 @@ describe('encoder', function () {
       assert.include(encoded, 'Content-Disposition: form-data; name="key"');
       assert.include(encoded, 'value');
     });
+
+    it('serializes a request with content-type == application/x-www-form-urlencoded', function () {
+      let request = {
+        verb: 'POST',
+        path: '/',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf8'
+        },
+        body: {
+          key: 'value',
+          anotherkey: 'anothervalue with spaces'
+        }
+      };
+
+      let encoded = encoder.serializeRequest(request);
+
+      assert.equal(encoded, 'key=value&anotherkey=anothervalue%20with%20spaces');
+    });
   });
 
   describe('deserializeResponse', function () {
@@ -120,7 +138,7 @@ describe('encoder', function () {
       assert.equal(encoder.deserializeResponse(body, headers), body);
     });
 
-    it('throws when response content-type multipart/*', function () {
+    it('throws when response content-type == multipart/*', function () {
       let headers = {
         'content-type': 'multipart/form-data; charset=utf8'
       };
@@ -130,13 +148,23 @@ describe('encoder', function () {
       assert.throws(() => encoder.deserializeResponse(body, headers), Error, 'Multipart does not support deserialization.');
     });
 
+    it('throws when response content-type == application/x-www-form-urlencoded', function () {
+      let headers = {
+        'content-type': 'application/x-www-form-urlencoded; charset=utf8'
+      };
+
+      let body = {keyOne: 'valOne'};
+
+      assert.throws(() => encoder.deserializeResponse(body, headers), Error, 'FormEncoded does not support deserialization');
+    });
+
     it('throws when content-type not supported', function () {
       let headers = {
         'content-type': 'not application/json; charset=utf8'
       };
       let body = '{"one":"two","three":["one","two","three"]}';
 
-      assert.throws(() => encoder.deserializeResponse(body, headers), Error, 'Unable to deserialize response with Content-Type not application/json; charset=utf8. Supported decodings are [/^application\\/json/, /^text\\/.*/, /^multipart\\/.*/]');
+      assert.throws(() => encoder.deserializeResponse(body, headers), Error, 'Unable to deserialize response with Content-Type not application/json; charset=utf8. Supported decodings ');
     });
 
     it('throws when headers undefined', function () {
