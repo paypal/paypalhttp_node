@@ -2,6 +2,7 @@
 
 let braintreehttp = require('../../lib/braintreehttp');
 let fs = require('fs');
+let zlib = require('zlib');
 
 describe('encoder', function () {
   let encoder = new braintreehttp.Encoder();
@@ -19,17 +20,6 @@ describe('encoder', function () {
       };
 
       assert.throws(() => encoder.serializeRequest(req), Error, 'Unable to serialize request with Content-Type not application/json. Supported encodings are ');
-    });
-
-    it('throws when headers undefined', function () {
-      let req = {
-        body: {
-          one: 'two',
-          three: ['one', 'two', 'three']
-        }
-      };
-
-      assert.throws(() => encoder.serializeRequest(req), Error, 'HttpRequest does not have Content-Type header set');
     });
 
     it('throws when content-type header not present', function () {
@@ -115,6 +105,26 @@ describe('encoder', function () {
 
       assert.equal(encoded, 'key=value&anotherkey=anothervalue%20with%20spaces');
     });
+
+    it('gzips data when content-encoding === gzip', function () {
+      let request = {
+        verb: 'POST',
+        path: '/',
+        headers: {
+          'Content-Type': 'application/json; charset=utf8',
+          'Content-Encoding': 'gzip'
+        },
+        body: {
+          key: 'value',
+          anotherkey: 'anothervalue with spaces'
+        }
+      };
+
+      let encoded = encoder.serializeRequest(request);
+      let expected = zlib.gzipSync(JSON.stringify(request.body));
+
+      assert.equal(encoded.toString('hex'), expected.toString('hex'));
+    });
   });
 
   describe('deserializeResponse', function () {
@@ -167,10 +177,17 @@ describe('encoder', function () {
       assert.throws(() => encoder.deserializeResponse(body, headers), Error, 'Unable to deserialize response with Content-Type not application/json; charset=utf8. Supported decodings ');
     });
 
-    it('throws when headers undefined', function () {
-      let body = '{"one":"two","three":["one","two","three"]}';
+    it('ungzips data when content-encoding === gzip', function () {
+      let headers = {
+        'content-type': 'application/json; charset=utf8',
+        'content-encoding': 'gzip'
+      };
 
-      assert.throws(() => encoder.deserializeResponse(body), Error, 'HttpResponse does not have Content-Type header set');
+      let rawData = '{"one":"two","three":["one","two","three"]}';
+      let body = zlib.gzipSync(rawData);
+      let decoded = encoder.deserializeResponse(body, headers);
+
+      assert.deepEqual(decoded, JSON.parse(rawData));
     });
   });
 });
