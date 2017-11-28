@@ -1,3 +1,8 @@
+## 0.3.0
+* Support gzip encoding.
+* Add support for application/x-www-form-urlencoded content.
+* Add support for multipart/* content.
+
 ## 0.2.1
 * Fix execute to not mutate requests.
 
