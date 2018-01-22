@@ -1,3 +1,6 @@
+## 0.3.1
+* Fix a bug where error responses were not gunzipped when content-encoding === 'gzip'.
+
 ## 0.3.0
 * Support gzip encoding.
 * Add support for application/x-www-form-urlencoded content.
