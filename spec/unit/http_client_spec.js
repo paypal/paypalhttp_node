@@ -5,6 +5,7 @@ let braintreehttp = require('../../lib/braintreehttp');
 let nock = require('nock');
 let sinon = require('sinon');
 let fs = require('fs');
+let zlib = require('zlib');
 
 describe('HttpClient', function () {
   let environment = new braintreehttp.Environment('https://localhost:5000');
@@ -220,6 +221,50 @@ describe('HttpClient', function () {
           assert.equal(resp.result.data, 1);
           assert.equal(resp.result.key, 'val');
         });
+    });
+
+    describe('gzip', function () {
+      it('unzips a 200-level response', function () {
+        let http = new braintreehttp.HttpClient(environment);
+        let request = {
+          verb: 'GET',
+          path: '/'
+        };
+
+        let body = zlib.gzipSync('{"data":1,"key":"val"}');
+
+        this.context.get('/').reply(200, body, {
+          'Content-Type': 'application/json',
+          'Content-Encoding': 'gzip'
+        });
+
+        return http.execute(request).then((resp) => {
+          assert.equal(1, resp.result.data);
+          assert.equal('val', resp.result.key);
+        });
+      });
+
+      it('unzips a non-200-level response', function () {
+        let http = new braintreehttp.HttpClient(environment);
+        let request = {
+          verb: 'GET',
+          path: '/'
+        };
+
+        let body = zlib.gzipSync('{"data":1,"key":"val"}');
+
+        this.context.get('/').reply(400, body, {
+          'Content-Type': 'application/json',
+          'Content-Encoding': 'gzip'
+        });
+
+        return http.execute(request).then((resp) => {
+          assert.fail('non 200-level response should have thrown an HttpError');
+        })
+        .catch((err) => {
+          assert.equal(err.message, '{"data":1,"key":"val"}');
+        });
+      });
     });
 
     it('rejects promise with error on non 200-level response', function () {

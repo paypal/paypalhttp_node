@@ -176,18 +176,5 @@ describe('encoder', function () {
 
       assert.throws(() => encoder.deserializeResponse(body, headers), Error, 'Unable to deserialize response with Content-Type not application/json; charset=utf8. Supported decodings ');
     });
-
-    it('ungzips data when content-encoding === gzip', function () {
-      let headers = {
-        'content-type': 'application/json; charset=utf8',
-        'content-encoding': 'gzip'
-      };
-
-      let rawData = '{"one":"two","three":["one","two","three"]}';
-      let body = zlib.gzipSync(rawData);
-      let decoded = encoder.deserializeResponse(body, headers);
-
-      assert.deepEqual(decoded, JSON.parse(rawData));
-    });
   });
 });
