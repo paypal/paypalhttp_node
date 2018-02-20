@@ -1,11 +1,12 @@
 'use strict';
-/* eslint-disable no-unused-vars, no-invalid-this */
+/* eslint-disable new-cap, no-unused-vars, no-invalid-this */
 
 let braintreehttp = require('../../lib/braintreehttp');
 let nock = require('nock');
 let sinon = require('sinon');
 let fs = require('fs');
 let zlib = require('zlib');
+let Busboy = require('busboy');
 
 describe('HttpClient', function () {
   let environment = new braintreehttp.Environment('https://localhost:5000');
@@ -183,20 +184,41 @@ describe('HttpClient', function () {
           'Content-Type': 'multipart/form-data'
         },
         body: {
-          file: fs.createReadStream('./README.md'),
+          file: fs.createReadStream('./spec/unit/resources/fileupload_test_binary.jpg'),
           key: 'value'
         }
       };
 
       this.context.post('/').reply(200, function (uri, body) {
-        assert.include(this.req.headers['content-type'], 'multipart/form-data; boundary=boundary');
+        let bb = new Busboy({headers: this.req.headers});
 
-        let filedata = fs.readFileSync('./README.md');
+        let fileChecked = false;
+        let fieldChecked = false;
 
-        assert.include(body, 'Content-Disposition: form-data; name="file"; filename="README.md"\r\nContent-Type: application/octet-stream');
-        assert.include(body, filedata);
-        assert.include(body, 'Content-Disposition: form-data; name="key"');
-        assert.include(body, 'value');
+        bb.on('file', (fieldname, file, filename, encoding, mimetype) => {
+          assert.equal(filename, 'fileupload_test_binary.jpg');
+          file.on('data', (data) => {
+            assert.equal(data.length, 1132);
+
+            fileChecked = true;
+          });
+        });
+
+        bb.on('field', (fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) => {
+          assert.equal(fieldname, 'key');
+          assert.equal(val, 'value');
+
+          fieldChecked = true;
+        });
+
+        bb.on('finish', () => {
+          assert.isTrue(fileChecked);
+          assert.isTrue(fieldChecked);
+        });
+
+        let stream = Buffer.from(body, 'hex');
+
+        bb.end(stream);
       });
 
       return this.http.execute(request).then((resp) => {
