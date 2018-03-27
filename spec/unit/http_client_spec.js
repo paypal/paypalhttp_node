@@ -2,6 +2,7 @@
 /* eslint-disable new-cap, no-unused-vars, no-invalid-this */
 
 let braintreehttp = require('../../lib/braintreehttp');
+let FormPart = require('../../lib/braintreehttp/serializer/multipart_related').FormPart;
 let nock = require('nock');
 let sinon = require('sinon');
 let fs = require('fs');
@@ -233,17 +234,14 @@ describe('HttpClient', function () {
         headers: {
           'Content-Type': 'multipart/related'
         },
-        partHeaders: {
-          input_field_name: {
-            'Content-Type': 'application/json'
-          }
-        },
         body: {
           file1: fs.createReadStream('./spec/unit/resources/fileupload_test_binary.jpg'),
           file2: fs.createReadStream('./spec/unit/resources/evidence.pdf'),
-          input_field_name: {
+          input_field_name: new FormPart({
             foo: "bar"
-          }
+          }, {
+            'Content-Type': 'application/json'
+          })
         }
       };
 
