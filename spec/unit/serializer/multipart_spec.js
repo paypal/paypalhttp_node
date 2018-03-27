@@ -28,7 +28,7 @@ describe('multipart serializer', function () {
     });
   });
 
-  describe.only('FormPart', function () {
+  describe('FormPart', function () {
     it('Header-Cases variations on content-type', function () {
       let lowerCaseFormPart = new FormPart({key: 'val'}, {'content-type': 'application/json'});
       let shoutCaseFormPart = new FormPart({key: 'val'}, {'CONTENT-TYPE': 'application/json'});
