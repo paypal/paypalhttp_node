@@ -30,11 +30,18 @@ describe('multipart serializer', function () {
 
   describe('FormPart', function () {
     it('Header-Cases variations on content-type', function () {
-      let lowerCaseFormPart = new FormPart({key: 'val'}, {'content-type': 'application/json'});
-      let shoutCaseFormPart = new FormPart({key: 'val'}, {'CONTENT-TYPE': 'application/json'});
+      let multiHeaderFormPart = new FormPart({key: 'val'}, {'content-type': 'application/json', 'CONTENT-ENCODING': 'gzip'});
 
-      assert.isTrue(Object.keys(lowerCaseFormPart.headers).indexOf('Content-Type') > -1);
-      assert.isTrue(Object.keys(shoutCaseFormPart.headers).indexOf('Content-Type') > -1);
+      assert.isTrue(Object.keys(multiHeaderFormPart.headers).indexOf('Content-Type') > -1);
+      assert.isTrue(Object.keys(multiHeaderFormPart.headers).indexOf('Content-Encoding') > -1);
+      assert.equal(Object.keys(multiHeaderFormPart.headers).length, 2);
+    });
+
+    it('keeps single header if collision', function () {
+      let multiHeaderFormPart = new FormPart({key: 'val'}, {'content-type': 'application/json', 'CONTENT-TYPE': 'application/json'});
+
+      assert.isTrue(Object.keys(multiHeaderFormPart.headers).indexOf('Content-Type') > -1);
+      assert.equal(Object.keys(multiHeaderFormPart.headers).length, 1);
     });
 
     it('Header-Cases edge case headers', function () {
