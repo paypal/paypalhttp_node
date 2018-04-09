@@ -2,6 +2,7 @@
 /* eslint-disable new-cap, no-unused-vars, no-invalid-this */
 
 let braintreehttp = require('../../lib/braintreehttp');
+let FormPart = require('../../lib/braintreehttp/serializer/multipart').FormPart;
 let nock = require('nock');
 let sinon = require('sinon');
 let fs = require('fs');
@@ -214,6 +215,80 @@ describe('HttpClient', function () {
         bb.on('finish', () => {
           assert.isTrue(fileChecked);
           assert.isTrue(fieldChecked);
+        });
+
+        let stream = Buffer.from(body, 'hex');
+
+        bb.end(stream);
+      });
+
+      return this.http.execute(request).then((resp) => {
+        assert.equal(resp.statusCode, 200);
+      });
+    });
+
+    it('serializes multipart/form-data request correctly', function () {
+      let request = {
+        verb: 'POST',
+        path: '/',
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        body: {
+          file1: fs.createReadStream('./spec/unit/resources/fileupload_test_binary.jpg'),
+          file2: fs.createReadStream('./spec/unit/resources/evidence.pdf'),
+          input: new FormPart({
+            foo: 'bar'
+          }, {
+            'Content-Type': 'application/json'
+          })
+        }
+      };
+
+      this.context.post('/').reply(200, function (uri, body) {
+        let bb = new Busboy({headers: this.req.headers});
+        let imageFileChecked = false;
+        let pdfFileChecked = false;
+        let jsonChecked = false;
+
+        assert.match(this.req.headers['content-type'], /^multipart\/form-data; boundary=/);
+
+        bb.on('file', (fieldname, file, filename, encoding, mimetype) => {
+          if (filename === 'fileupload_test_binary.jpg') {
+            file.on('data', (data) => {
+              assert.isTrue(jsonChecked); // ensure JSON is sent first
+
+              assert.equal(mimetype, 'image/jpeg');
+              assert.equal(fieldname, 'file1');
+              assert.equal(data.length, 1132);
+
+              imageFileChecked = true;
+            });
+          } else if (filename === 'input.json') {
+            file.on('data', (data) => {
+              assert.equal(mimetype, 'application/json');
+              assert.equal(fieldname, 'input');
+              assert.equal(data, '{"foo":"bar"}');
+
+              jsonChecked = true;
+            });
+          } else if (filename === 'evidence.pdf') {
+            file.on('data', (data) => {
+              assert.isTrue(jsonChecked); // ensure JSON is sent first
+
+              assert.equal(mimetype, 'application/pdf');
+              assert.equal(fieldname, 'file2');
+              assert.equal(data.length, 31376);
+
+              pdfFileChecked = true;
+            });
+          }
+        });
+
+        bb.on('finish', () => {
+          assert.isTrue(imageFileChecked);
+          assert.isTrue(jsonChecked);
+          assert.isTrue(pdfFileChecked);
         });
 
         let stream = Buffer.from(body, 'hex');

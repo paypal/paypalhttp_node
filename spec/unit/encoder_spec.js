@@ -3,9 +3,13 @@
 let braintreehttp = require('../../lib/braintreehttp');
 let fs = require('fs');
 let zlib = require('zlib');
+let Json = require('../../lib/braintreehttp/serializer/json').Json;
+let Text = require('../../lib/braintreehttp/serializer/text').Text;
+let Multipart = require('../../lib/braintreehttp/serializer/multipart').Multipart;
+let FormEncoded = require('../../lib/braintreehttp/serializer/form_encoded').FormEncoded;
 
 describe('encoder', function () {
-  let encoder = new braintreehttp.Encoder();
+  let encoder = new braintreehttp.Encoder([new Json(), new Text(), new Multipart(), new FormEncoded()]);
 
   describe('serializeRequest', function () {
     it('throws when content-type not supported', function () {
