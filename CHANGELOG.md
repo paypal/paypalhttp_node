@@ -1,3 +1,6 @@
+## 0.4.0
+* Add support for multipart/form-data file uploads with JSON content FormParts.
+
 ## 0.3.1
 * Fix a bug where error responses were not gunzipped when content-encoding === 'gzip'.
 
