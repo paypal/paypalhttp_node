@@ -1,15 +1,15 @@
 'use strict';
 
-let braintreehttp = require('../../lib/braintreehttp');
+let paypalhttp = require('../../lib/paypalhttp');
 let fs = require('fs');
 let zlib = require('zlib');
-let Json = require('../../lib/braintreehttp/serializer/json').Json;
-let Text = require('../../lib/braintreehttp/serializer/text').Text;
-let Multipart = require('../../lib/braintreehttp/serializer/multipart').Multipart;
-let FormEncoded = require('../../lib/braintreehttp/serializer/form_encoded').FormEncoded;
+let Json = require('../../lib/paypalhttp/serializer/json').Json;
+let Text = require('../../lib/paypalhttp/serializer/text').Text;
+let Multipart = require('../../lib/paypalhttp/serializer/multipart').Multipart;
+let FormEncoded = require('../../lib/paypalhttp/serializer/form_encoded').FormEncoded;
 
 describe('encoder', function () {
-  let encoder = new braintreehttp.Encoder([new Json(), new Text(), new Multipart(), new FormEncoded()]);
+  let encoder = new paypalhttp.Encoder([new Json(), new Text(), new Multipart(), new FormEncoded()]);
 
   describe('serializeRequest', function () {
     it('throws when content-type not supported', function () {

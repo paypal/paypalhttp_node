@@ -1,6 +1,6 @@
 require 'securerandom'
 
-configatron.product_name = "BraintreeHttp Node"
+configatron.product_name = "PayPalHttp Node"
 
 # Custom validations
 def test
@@ -16,7 +16,7 @@ def _test_with_dockerfile(node_version)
 end
 
 def package_version
-	regex = /braintreehttp: '(\d+\.\d+\.\d+)'/
+	regex = /paypalhttp: '(\d+\.\d+\.\d+)'/
 	puts regex
 	regex.match(`npm version`)[1]
 end

@@ -1,4 +1,4 @@
-# Contribute to the Braintree Node HttpClient
+# Contribute to the PayPal Node HttpClient
 
 ### *Pull requests are welcome!*
 

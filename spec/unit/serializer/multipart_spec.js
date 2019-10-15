@@ -1,6 +1,6 @@
 'use strict';
 
-let Multipart = require('../../../lib/braintreehttp/serializer/multipart');
+let Multipart = require('../../../lib/paypalhttp/serializer/multipart');
 let FormPart = Multipart.FormPart;
 
 describe('multipart serializer', function () {
