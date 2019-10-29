@@ -15,7 +15,7 @@ describe('encoder', function () {
     it('throws when content-type not supported', function () {
       let req = {
         headers: {
-          'Content-Type': 'not application/json'
+          'content-type': 'not application/json'
         },
         body: {
           one: 'two',
@@ -43,7 +43,7 @@ describe('encoder', function () {
     it('serializes a request with content-type == application/json', function () {
       let req = {
         headers: {
-          'Content-Type': 'application/json; charset=utf8'
+          'content-type': 'application/json; charset=utf8'
         },
         body: {
           one: 'two',
@@ -57,7 +57,7 @@ describe('encoder', function () {
     it('serializes a request with content-type == text/*', function () {
       let req = {
         headers: {
-          'Content-Type': 'text/asdf; charset=utf8'
+          'content-type': 'text/asdf; charset=utf8'
         },
         body: 'some asdf text'
       };
@@ -72,7 +72,7 @@ describe('encoder', function () {
         verb: 'POST',
         path: '/',
         headers: {
-          'Content-Type': 'multipart/form-data; charset=utf8'
+          'content-type': 'multipart/form-data; charset=utf8'
         },
         body: {
           file: fs.createReadStream(fp),
@@ -82,7 +82,8 @@ describe('encoder', function () {
 
       let encoded = encoder.serializeRequest(request);
 
-      assert.include(request.headers['content-type'], 'multipart/form-data; boundary=boundary');
+      assert.include(request.headers['content-type'], 'boundary=boundary');
+      assert.include(request.headers['content-type'], 'multipart/form-data');
 
       let filedata = fs.readFileSync(fp);
 
@@ -97,7 +98,7 @@ describe('encoder', function () {
         verb: 'POST',
         path: '/',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=utf8'
+          'content-type': 'application/x-www-form-urlencoded; charset=utf8'
         },
         body: {
           key: 'value',
@@ -115,8 +116,8 @@ describe('encoder', function () {
         verb: 'POST',
         path: '/',
         headers: {
-          'Content-Type': 'application/json; charset=utf8',
-          'Content-Encoding': 'gzip'
+          'content-type': 'application/json; charset=utf8',
+          'content-encoding': 'gzip'
         },
         body: {
           key: 'value',
