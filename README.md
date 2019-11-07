@@ -1,12 +1,12 @@
-## Braintree HttpClient
+## PayPal HttpClient
 
-BraintreeHttp is a generic HTTP Client.
+PayPalHttp is a generic HTTP Client.
 
-In it's simplest form, an [`HttpClient`](./lib/braintreehttp/http_client.js) exposes an `#execute` method which takes an `HttpRequest`, executes it against the domain described in an `Environment`, and returns a Promise.
+In it's simplest form, an [`HttpClient`](lib/paypalhttp/http_client.js) exposes an `#execute` method which takes an `HttpRequest`, executes it against the domain described in an `Environment`, and returns a Promise.
 
 ### Environment
 
-An [`Environment`](./lib/braintreehttp/environment.js) describes a domain that hosts a REST API, against which an `HttpClient` will make requests. `Environment` is a simple class that contains one property, `baseUrl`.
+An [`Environment`](lib/paypalhttp/environment.js) describes a domain that hosts a REST API, against which an `HttpClient` will make requests. `Environment` is a simple class that contains one property, `baseUrl`.
 
 ```js
 let env = new Environment('https://example.com');
@@ -18,7 +18,7 @@ HTTP requests contain all the information needed to make an HTTP request against
 
 ### Responses
 
-HTTP responses contain information returned by a server in response to a request as described above. They are simple objects which contain a `statusCode`, `headers`, and a `result`, which reprepsents any data returned by the server.
+HTTP responses contain information returned by a server in response to a request as described above. They are simple objects which contain a `statusCode`, `headers`, and a `result`, which represents any data returned by the server.
 
 ```js
 let req = {
@@ -80,10 +80,10 @@ client.execute(req)
 ```
 
 ### Serializer
-(De)Serialization of request and response data is done by instances of [`Encoder`](./lib/braintreehttp/encoder.js). BraintreeHttp currently supports `json` encoding out of the box.
+(De)Serialization of request and response data is done by instances of [`Encoder`](lib/paypalhttp/encoder.js). PayPalHttp currently supports `json` encoding out of the box.
 
 ## License
-BraintreeHttp-Node is open source and available under the MIT license. See the [LICENSE](./LICENSE) file for more info.
+PayPalHttp-Node is open source and available under the MIT license. See the [LICENSE](./LICENSE) file for more info.
 
 ## Contributing
 Pull requests and issues are welcome. Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.

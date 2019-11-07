@@ -1,8 +1,8 @@
 'use strict';
 /* eslint-disable new-cap, no-unused-vars, no-invalid-this */
 
-let braintreehttp = require('../../lib/braintreehttp');
-let FormPart = require('../../lib/braintreehttp/serializer/multipart').FormPart;
+let paypalhttp = require('../../lib/paypalhttp');
+let FormPart = require('../../lib/paypalhttp/serializer/multipart').FormPart;
 let nock = require('nock');
 let sinon = require('sinon');
 let fs = require('fs');
@@ -10,16 +10,16 @@ let zlib = require('zlib');
 let Busboy = require('busboy');
 
 describe('HttpClient', function () {
-  let environment = new braintreehttp.Environment('https://localhost:5000');
+  let environment = new paypalhttp.Environment('https://localhost:5000');
 
   beforeEach(function () {
     this.context = nock(environment.baseUrl);
-    this.http = new braintreehttp.HttpClient(environment);
+    this.http = new paypalhttp.HttpClient(environment);
   });
 
   describe('getUserAgent', function () {
     it('returns the user agent', function () {
-      assert.equal(this.http.getUserAgent(), 'BraintreeHttp-Node HTTP/1.1');
+      assert.equal(this.http.getUserAgent(), 'PayPalHttp-Node HTTP/1.1');
     });
   });
 
@@ -120,7 +120,7 @@ describe('HttpClient', function () {
 
       this.context.get('/')
         .reply(200, function (uri, body) {
-          assert.equal(this.req.headers['user-agent'], 'BraintreeHttp-Node HTTP/1.1');
+          assert.equal(this.req.headers['user-agent'], 'PayPalHttp-Node HTTP/1.1');
         });
 
       return this.http.execute(request);
@@ -135,7 +135,7 @@ describe('HttpClient', function () {
 
       this.context.get('/')
         .reply(200, function (uri, body) {
-          assert.equal(this.req.headers['user-agent'], 'BraintreeHttp-Node HTTP/1.1');
+          assert.equal(this.req.headers['user-agent'], 'PayPalHttp-Node HTTP/1.1');
         });
 
       return this.http.execute(request);
@@ -302,7 +302,7 @@ describe('HttpClient', function () {
     });
 
     it('parses 200-level response', function () {
-      let http = new braintreehttp.HttpClient(environment);
+      let http = new paypalhttp.HttpClient(environment);
       let request = {
         verb: 'GET',
         path: '/'
@@ -322,7 +322,7 @@ describe('HttpClient', function () {
 
     describe('gzip', function () {
       it('unzips a 200-level response', function () {
-        let http = new braintreehttp.HttpClient(environment);
+        let http = new paypalhttp.HttpClient(environment);
         let request = {
           verb: 'GET',
           path: '/'
@@ -342,7 +342,7 @@ describe('HttpClient', function () {
       });
 
       it('unzips a non-200-level response', function () {
-        let http = new braintreehttp.HttpClient(environment);
+        let http = new paypalhttp.HttpClient(environment);
         let request = {
           verb: 'GET',
           path: '/'

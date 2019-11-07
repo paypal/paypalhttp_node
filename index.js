@@ -1,3 +1,3 @@
 'use strict';
 
-module.exports = require('./lib/braintreehttp');
+module.exports = require('./lib/paypalhttp');

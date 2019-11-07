@@ -6,8 +6,3 @@ node_js:
   - 8
 before_script: npm install
 script: npm test
-notifications:
-  email:
-    recipients:
-    - external-ci-notifications+braintreehttp@getbraintree.com
-    on_success: change
