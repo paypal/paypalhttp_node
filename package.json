@@ -1,5 +1,5 @@
 {
-  "name": "paypalhttp",
+  "name": "@paypal/paypalhttp",
   "version": "1.0.0",
   "description": "A library for integrating with PayPalHttp.",
   "keywords": [
