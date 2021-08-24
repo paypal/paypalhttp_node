@@ -144,9 +144,29 @@ describe('encoder', function () {
       assert.deepEqual(deserialized.three, ['one', 'two', 'three']);
     });
 
+    it('deserializes a case insensitive response with content-type == application/JSON', function () {
+      let headers = {
+        'content-type': 'application/JSON; charset=utf8'
+      };
+      let body = '{"one":"two","three":["one","two","three"]}';
+      let deserialized = encoder.deserializeResponse(body, headers);
+
+      assert.equal(deserialized.one, 'two');
+      assert.deepEqual(deserialized.three, ['one', 'two', 'three']);
+    });
+
     it('deserializes a response with content-type == text/*', function () {
       let headers = {
         'content-type': 'text/asdf; charset=utf8'
+      };
+      let body = 'some asdf text';
+
+      assert.equal(encoder.deserializeResponse(body, headers), body);
+    });
+
+    it('deserializes a case insensitive response with content-type == TEXT/*', function () {
+      let headers = {
+        'content-type': 'TEXT/asdf; charset=utf8'
       };
       let body = 'some asdf text';
 
