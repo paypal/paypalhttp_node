@@ -29,6 +29,24 @@ describe('HttpClient', function () {
     });
   });
 
+  describe('formatHeaders', function () {
+    it('returns formatted headers', function () {
+      let headers = {
+        'Content-Type': 'application/JSON',
+        key: 'value'
+      };
+
+      let expected = {
+        'content-type': 'application/json',
+        key: 'value'
+      };
+
+      let formattedHeaders = this.http.formatHeaders(headers);
+
+      assert.equal(formattedHeaders['content-type'], expected['content-type']);
+    });
+  });
+
   describe('addInjector', function () {
     it('adds to the injectors array', function () {
       function injector(request) {}
